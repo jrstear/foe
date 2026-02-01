@@ -1,0 +1,3 @@
+[submodule "vendor/flux-operator"]
+	path = vendor/flux-operator
+	url = https://github.com/flux-framework/flux-operator.git

@@ -1,0 +1,112 @@
+# Helm values for kube-prometheus-stack on OrbStack
+# Optimized for local development with minimal resource usage
+
+# Prometheus configuration
+prometheus:
+  prometheusSpec:
+    # Retention settings
+    retention: 7d
+    retentionSize: "5GB"
+    
+    # Resource limits for OrbStack
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    
+    # Storage configuration
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+    
+    # Service monitors - automatically discover Flux pods
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    
+    # Additional scrape configs for Flux pods
+    additionalScrapeConfigs:
+      - job_name: 'flux-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Only scrape pods with flux-related labels
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            regex: flux.*
+            action: keep
+          # Add cluster label from pod labels
+          - source_labels: [__meta_kubernetes_pod_label_cluster]
+            target_label: cluster
+          # Add location label from pod labels
+          - source_labels: [__meta_kubernetes_pod_label_location]
+            target_label: location
+          # Add cost-tier label from pod labels
+          - source_labels: [__meta_kubernetes_pod_label_cost_tier]
+            target_label: cost_tier
+          # Standard relabeling
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
+# Grafana configuration
+grafana:
+  enabled: true
+  
+  # Admin credentials
+  adminPassword: prom-operator
+  
+  # Resource limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  # Disable sidecar datasource provisioning to avoid conflicts
+  sidecar:
+    datasources:
+      enabled: false
+  
+  # Datasources - local Prometheus only
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus-Local
+          type: prometheus
+          url: http://monitoring-kube-prometheus-prometheus.monitoring:9090
+          access: proxy
+          isDefault: true
+          jsonData:
+            timeInterval: 30s
+
+# Alertmanager - disabled for local dev
+alertmanager:
+  enabled: false
+
+# Node exporter - capture host metrics
+nodeExporter:
+  enabled: true
+
+# Kube-state-metrics - capture k8s object state
+kubeStateMetrics:
+  enabled: true
+
+# Disable components not needed for local dev
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
