@@ -98,8 +98,10 @@ kubectl delete minicluster sandia-study-cluster --ignore-not-found=true
 kubectl delete minicluster sandia-study-cluster-local --ignore-not-found=true
 sleep 2
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Deploy ARM64-compatible Flux (single node for local)
-kubectl apply -f k8s/flux-orbstack.yaml
+kubectl apply -f "$SCRIPT_DIR/flux.yaml"
 
 echo "Waiting for MiniCluster to be ready..."
 sleep 5
@@ -129,7 +131,7 @@ echo -e "${GREEN}✓ Local deployment complete!${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Run ./scripts/verify-orbstack-flux.sh to test the cluster"
+echo "  1. Run ./orbstack/verify.sh to test the cluster"
 echo "  2. Access the head node:"
 echo "     POD_NAME=\$(kubectl get pods -l flux-role=broker,flux-index=0 -o jsonpath='{.items[0].metadata.name}')"
 echo "     kubectl exec -it \$POD_NAME -- bash"
@@ -139,4 +141,4 @@ echo "To switch back to AWS EKS:"
 echo "  kubectl config use-context <eks-context-name>"
 echo ""
 echo "To clean up local cluster:"
-echo "  ./scripts/cleanup-orbstack-flux.sh"
+echo "  ./orbstack/cleanup.sh"

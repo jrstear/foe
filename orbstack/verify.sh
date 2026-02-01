@@ -20,14 +20,14 @@ kubectl get minicluster sandia-study-cluster-local
 echo ""
 
 echo -e "${BLUE}3. MiniCluster pods:${NC}"
-kubectl get pods -l app.kubernetes.io/name=flux-sample
+kubectl get pods -l job-name=sandia-study-cluster-local
 echo ""
 
 echo -e "${BLUE}4. Getting lead broker pod...${NC}"
-POD_NAME=$(kubectl get pods -l flux-role=broker,flux-index=0 -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+POD_NAME=$(kubectl get pods -l job-name=sandia-study-cluster-local,job-index=0 -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
 
 if [ -z "$POD_NAME" ]; then
-    echo "Trying alternative label selector..."
+    echo "Trying alternative label selector (flux-sample)..."
     POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=flux-sample -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
 fi
 
@@ -43,11 +43,13 @@ echo -e "${BLUE}5. Running parallel hostname test...${NC}"
 echo "Command: flux run -n 2 hostname"
 echo ""
 
-kubectl exec -it $POD_NAME -- flux run -n 2 hostname
+kubectl exec -it $POD_NAME -- bash -c "export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux run -n 2 hostname"
 
 echo ""
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echo -e "${BLUE}6. Running OSU Bandwidth Benchmark...${NC}"
-./scripts/submit-osu-benchmark.sh --benchmark bw --np 2 --cluster local --context orbstack
+"$SCRIPT_DIR/run-benchmark.sh" --benchmark bw --np 2 --cluster local --context orbstack --wait
 
 echo -e "${GREEN}✓ Local verification complete!${NC}"
 echo ""

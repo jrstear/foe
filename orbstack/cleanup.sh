@@ -13,8 +13,10 @@ NC='\033[0m'
 # Ensure we're using OrbStack context
 kubectl config use-context orbstack
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echo -e "${BLUE}Step 1: Deleting MiniCluster...${NC}"
-kubectl delete -f k8s/flux-orbstack.yaml --ignore-not-found=true
+kubectl delete -f "$SCRIPT_DIR/flux.yaml" --ignore-not-found=true
 
 echo "Waiting for MiniCluster pods to terminate..."
 kubectl wait --for=delete pods -l app.kubernetes.io/name=sandia-study-cluster-local --timeout=120s 2>/dev/null || true
