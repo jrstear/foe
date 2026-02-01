@@ -2,6 +2,10 @@ apiVersion: flux-framework.org/v1alpha2
 kind: MiniCluster
 metadata:
   name: sandia-study-cluster
+  labels:
+    cluster: cloud
+    location: eks
+    cost-tier: paid
 spec:
   # 2-node cluster matching our EKS node count
   size: 2

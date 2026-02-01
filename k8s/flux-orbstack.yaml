@@ -2,6 +2,10 @@ apiVersion: flux-framework.org/v1alpha2
 kind: MiniCluster
 metadata:
   name: sandia-study-cluster-local
+  labels:
+    cluster: local
+    location: orbstack
+    cost-tier: free
 spec:
   # Single node for local testing (OrbStack has 1 node)
   size: 1
