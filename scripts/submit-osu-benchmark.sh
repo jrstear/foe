@@ -104,22 +104,29 @@ else
 fi
 
 echo ""
+# Determine benchmark directory (pt2pt vs collective)
+if [[ "$BENCHMARK" == "bw" || "$BENCHMARK" == "latency" || "$BENCHMARK" == "bibw" ]]; then
+  BENCH_TYPE="pt2pt"
+else
+  BENCH_TYPE="collective"
+fi
+
 echo -e "${BLUE}Submitting job to Flux...${NC}"
 
 # Submit the job via flux
 kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "
   export FLUX_URI=local:///mnt/flux/config/run/flux/local
-  flux submit -n ${NP} sudo -u fluxuser /usr/bin/mpirun -np ${NP} /usr/local/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_${BENCHMARK}
+  flux submit -n ${NP} sudo -u fluxuser /usr/bin/mpirun -np ${NP} /usr/local/libexec/osu-micro-benchmarks/mpi/${BENCH_TYPE}/osu_${BENCHMARK}
 "
 
 echo ""
 echo -e "${GREEN}✓ Job submitted!${NC}"
 echo ""
 echo "To view job status:"
-echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- flux jobs"
+echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux jobs\""
 echo ""
 echo "To view job output:"
-echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- flux job attach <JOBID>"
+echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux job attach <JOBID>\""
 echo ""
 echo "To view all jobs:"
-echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- flux jobs -a"
+echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux jobs -a\""
