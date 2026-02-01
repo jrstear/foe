@@ -46,12 +46,7 @@ echo ""
 kubectl exec -it $POD_NAME -- bash -c "export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux run -n 2 hostname"
 
 echo ""
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-echo -e "${BLUE}6. Running OSU Bandwidth Benchmark...${NC}"
-"$SCRIPT_DIR/run-benchmark.sh" --benchmark bw --np 2 --cluster local --context orbstack --wait
-
-echo -e "${GREEN}✓ Local verification complete!${NC}"
+echo -e "${GREEN}✓ Hostname verification complete!${NC}"
 echo ""
 echo "To access the head node interactively:"
 echo "  kubectl exec -it $POD_NAME -- bash"
