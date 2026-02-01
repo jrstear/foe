@@ -19,10 +19,10 @@ spec:
     - image: ghcr.io/flux-framework/flux-restful-api:latest
       workingDir: /home/flux
       
-      # Simple hostname test for local validation
+      # Keep broker running for persistent use
       command: |
-        flux submit hostname
-        flux queue drain
+        echo "Flux broker starting..."
+        tail -f /dev/null
       
   # Interactive mode - allows exec into pods
   interactive: true

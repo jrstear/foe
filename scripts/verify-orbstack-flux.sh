@@ -46,6 +46,9 @@ echo ""
 kubectl exec -it $POD_NAME -- flux run -n 2 hostname
 
 echo ""
+echo -e "${BLUE}6. Running OSU Bandwidth Benchmark...${NC}"
+./scripts/submit-osu-benchmark.sh --benchmark bw --np 2 --cluster local --context orbstack
+
 echo -e "${GREEN}✓ Local verification complete!${NC}"
 echo ""
 echo "To access the head node interactively:"
