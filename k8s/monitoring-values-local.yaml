@@ -57,7 +57,269 @@ prometheus:
 
 # Grafana configuration
 grafana:
-  enabled: true
+  # Dashboards
+  dashboards:
+    default:
+      hybrid-view:
+        json: |
+          {
+            "annotations": {
+              "list": []
+            },
+            "editable": true,
+            "gnetId": null,
+            "graphTooltip": 0,
+            "id": null,
+            "links": [],
+            "panels": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus-Local"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 0
+                },
+                "id": 1,
+                "options": {
+                  "colorMode": "value",
+                  "graphMode": "area",
+                  "justifyMode": "auto",
+                  "orientation": "auto",
+                  "reduceOptions": {
+                    "calcs": [
+                      "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                  },
+                  "textMode": "auto",
+                  "wideLayout": true
+                },
+                "pluginVersion": "11.1.0",
+                "targets": [
+                  {
+                    "datasource": {
+                      "type": "prometheus",
+                      "uid": "Prometheus-Local"
+                    },
+                    "editorMode": "code",
+                    "expr": "flux_uptime",
+                    "legendFormat": "Local (OrbStack)",
+                    "range": true,
+                    "refId": "A"
+                  }
+                ],
+                "title": "Local Cluster Uptime",
+                "type": "stat"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus-Cloud"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 0
+                },
+                "id": 2,
+                "options": {
+                  "colorMode": "value",
+                  "graphMode": "area",
+                  "justifyMode": "auto",
+                  "orientation": "auto",
+                  "reduceOptions": {
+                    "calcs": [
+                      "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                  },
+                  "textMode": "auto",
+                  "wideLayout": true
+                },
+                "pluginVersion": "11.1.0",
+                "targets": [
+                  {
+                    "datasource": {
+                      "type": "prometheus",
+                      "uid": "Prometheus-Cloud"
+                    },
+                    "editorMode": "code",
+                    "expr": "flux_uptime",
+                    "legendFormat": "Cloud (EKS)",
+                    "range": true,
+                    "refId": "A"
+                  }
+                ],
+                "title": "Cloud Cluster Uptime",
+                "type": "stat"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus-Local"
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 8
+                },
+                "id": 3,
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "targets": [
+                  {
+                    "datasource": {
+                      "type": "prometheus",
+                      "uid": "Prometheus-Local"
+                    },
+                    "editorMode": "code",
+                    "expr": "flux_job_count",
+                    "legendFormat": "Local Jobs",
+                    "range": true,
+                    "refId": "A"
+                  }
+                ],
+                "title": "Local Job Count",
+                "type": "timeseries"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus-Cloud"
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 8
+                },
+                "id": 4,
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "targets": [
+                  {
+                    "datasource": {
+                      "type": "prometheus",
+                      "uid": "Prometheus-Cloud"
+                    },
+                    "editorMode": "code",
+                    "expr": "flux_job_count",
+                    "legendFormat": "Cloud Jobs",
+                    "range": true,
+                    "refId": "A"
+                  }
+                ],
+                "title": "Cloud Job Count",
+                "type": "timeseries"
+              }
+            ],
+            "schemaVersion": 39,
+            "tags": [
+              "flux",
+              "hybrid"
+            ],
+            "templating": {
+              "list": []
+            },
+            "time": {
+              "from": "now-6h",
+              "to": "now"
+            },
+            "timepicker": {},
+            "timezone": "",
+            "title": "Hybrid Flux View",
+            "uid": "flux-hybrid-overview",
+            "version": 1,
+            "weekStart": ""
+          }
+
+
+  # Dashboard providers
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
   
   # Admin credentials
   adminPassword: prom-operator
@@ -71,10 +333,14 @@ grafana:
       cpu: 500m
       memory: 512Mi
   
-  # Disable sidecar datasource provisioning to avoid conflicts
+  # Enable sidecar datasource provisioning
   sidecar:
     datasources:
       enabled: false
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
   
   # Datasources - local Prometheus only
   datasources:
@@ -86,6 +352,13 @@ grafana:
           url: http://monitoring-kube-prometheus-prometheus.monitoring:9090
           access: proxy
           isDefault: true
+          jsonData:
+            timeInterval: 30s
+        - name: Prometheus-Cloud
+          type: prometheus
+          url: http://a4422c9b65a0143aeb73954efabec8c5-951b41d6eb081241.elb.us-west-2.amazonaws.com:9090
+          access: proxy
+          isDefault: false
           jsonData:
             timeInterval: 30s
 
