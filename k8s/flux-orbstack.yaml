@@ -1,0 +1,28 @@
+apiVersion: flux-framework.org/v1alpha2
+kind: MiniCluster
+metadata:
+  name: sandia-study-cluster-local
+spec:
+  # Single node for local testing (OrbStack has 1 node)
+  size: 1
+  
+  # Number of parallel tasks
+  tasks: 1
+  
+  # Flux container configuration
+  # Using flux-restful-api which has ARM64 support
+  containers:
+    - image: ghcr.io/flux-framework/flux-restful-api:latest
+      workingDir: /home/flux
+      
+      # Simple hostname test for local validation
+      command: |
+        flux submit hostname
+        flux queue drain
+      
+  # Interactive mode - allows exec into pods
+  interactive: true
+  
+  # Logging for debugging
+  flux:
+    logLevel: 7

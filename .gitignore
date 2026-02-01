@@ -1,0 +1,40 @@
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/tfplan
+terraform/.terraform.tfstate.lock.info
+
+# AWS
+.aws/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Vim
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+vendor/
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+plan.out

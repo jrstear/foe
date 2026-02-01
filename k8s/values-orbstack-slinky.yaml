@@ -1,0 +1,30 @@
+# OrbStack Specific Values for Slinky Slurm
+clusters:
+  slurm:
+    name: orbstack-slurm
+
+nodesets:
+  # Disable default nodeset
+  slinky:
+    enabled: false
+
+  # Create origin-prefixed nodeset
+  orbstack-slinky:
+    enabled: true
+    replicas: 1
+    slurmd:
+      image:
+        repository: ghcr.io/slinkyproject/slurmd
+        tag: 25.11-ubuntu24.04
+    logfile:
+      image:
+        repository: docker.io/library/alpine
+        tag: latest
+    updateStrategy:
+      type: RollingUpdate
+    partition:
+      enabled: true
+      configMap:
+        State: UP
+        Default: "YES"
+        MaxTime: UNLIMITED

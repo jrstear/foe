@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: flux-job-submitter
+spec:
+  restartPolicy: Never
+  containers:
+  - name: submitter
+    image: ghcr.io/flux-framework/flux-restful-api:latest
+    command: ["/bin/bash", "-c"]
+    args:
+    - |
+      echo "Connecting to Flux broker at sandia-study-cluster-0..."
+      
+      # Set up Flux environment
+      export FLUX_URI=ssh://sandia-study-cluster-0:8050
+      
+      # Simple test job
+      echo "Running: flux run -N 2 -n 2 hostname"
+      flux run -N 2 -n 2 hostname -f
+      
+      echo "Job complete!"
+      sleep 3600  # Keep pod alive for inspection

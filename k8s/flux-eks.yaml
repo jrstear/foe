@@ -1,0 +1,29 @@
+apiVersion: flux-framework.org/v1alpha2
+kind: MiniCluster
+metadata:
+  name: sandia-study-cluster
+spec:
+  # 2-node cluster matching our EKS node count
+  size: 2
+  
+  # Number of parallel tasks
+  tasks: 2
+  
+  # Flux container configuration
+  containers:
+    - image: ghcr.io/flux-framework/flux-restful-api:latest
+      workingDir: /home/flux
+      
+      # Keep broker running - attempt manual job submission
+      command: |
+        echo "Flux broker starting..."
+        echo "Cluster ready with 2 nodes"
+        # Keep container alive
+        tail -f /dev/null
+      
+  # Interactive mode - allows exec into pods
+  interactive: true
+  
+  # Logging for debugging
+  flux:
+    logLevel: 7
