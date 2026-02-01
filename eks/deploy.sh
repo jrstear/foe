@@ -13,13 +13,16 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Check prerequisites
 echo -e "${BLUE}Step 1: Checking prerequisites...${NC}"
-./scripts/setup.sh || exit 1
+"$REPO_ROOT/scripts/setup.sh" || exit 1
 
 echo ""
 echo -e "${BLUE}Step 2: Deploying Terraform infrastructure...${NC}"
-cd terraform/eks-flux
+cd "$REPO_ROOT/terraform/eks-flux"
 
 # Initialize Terraform
 if [ ! -d ".terraform" ]; then
@@ -45,7 +48,7 @@ terraform apply tfplan
 CLUSTER_NAME=$(terraform output -raw cluster_name)
 AWS_REGION=$(terraform output -raw region)
 
-cd ..
+cd "$SCRIPT_DIR"
 
 echo ""
 echo -e "${BLUE}Step 3: Configuring kubectl...${NC}"
@@ -73,7 +76,8 @@ echo -e "${GREEN}✓ Flux Operator pods:${NC}"
 kubectl get pods -n operator-system
 
 echo ""
-kubectl apply -f k8s/flux-eks.yaml
+echo -e "${BLUE}Step 5: Deploying EKS Flux Cluster...${NC}"
+kubectl apply -f "$SCRIPT_DIR/flux.yaml"
 
 # Wait for MiniCluster to be ready
 echo "Waiting for MiniCluster to be ready (this may take a few minutes)..."
@@ -96,7 +100,7 @@ kubectl get minicluster sandia-study-cluster
 
 echo ""
 echo -e "${GREEN}✓ MiniCluster pods:${NC}"
-kubectl get pods -l app.kubernetes.io/name=flux-sample
+kubectl get pods -l job-name=sandia-study-cluster
 
 echo ""
 echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
@@ -104,10 +108,10 @@ echo -e "${GREEN}✓ Deployment complete!${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Run ./scripts/verify-eks-flux.sh to test the cluster"
+echo "  1. Run ./eks/verify-hostname.sh to test the cluster"
 echo "  2. Access the head node:"
-echo "     POD_NAME=\$(kubectl get pods -l flux-role=broker,flux-index=0 -o jsonpath='{.items[0].metadata.name}')"
+echo "     POD_NAME=\$(kubectl get pods -l job-name=sandia-study-cluster,job-index=0 -o jsonpath='{.items[0].metadata.name}')"
 echo "     kubectl exec -it \$POD_NAME -- bash"
 echo "  3. Inside the pod, run: flux run -n 2 hostname"
 echo ""
-echo "To clean up: ./scripts/cleanup-eks-flux.sh"
+echo "To clean up: ./eks/cleanup.sh"

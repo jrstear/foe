@@ -1,5 +1,5 @@
 #!/bin/bash
-# Submit OSU Micro-Benchmark jobs to persistent Flux MiniCluster
+# Submit OSU Micro-Benchmark jobs to EKS Flux Cluster
 set -e
 
 # Color codes
@@ -11,7 +11,8 @@ NC='\033[0m'
 # Default values
 BENCHMARK="bw"
 NP=2
-CLUSTER="local"
+CLUSTER="cloud"
+WAIT="false"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -32,9 +33,13 @@ while [[ $# -gt 0 ]]; do
       CONTEXT="$2"
       shift 2
       ;;
+    --wait)
+      WAIT="true"
+      shift 1
+      ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--benchmark bw|latency|allreduce] [--np NUM_PROCS] [--cluster local|cloud] [--context CONTEXT_NAME]"
+      echo "Usage: $0 [--benchmark bw|latency|allreduce] [--np NUM_PROCS] [--cluster cloud] [--context CONTEXT_NAME] [--wait]"
       exit 1
       ;;
   esac
@@ -46,19 +51,15 @@ else
   KUBECTL_ARGS=""
 fi
 
-echo -e "${BLUE}🚀 Submitting OSU Benchmark Job to Flux${NC}"
+echo -e "${BLUE}🚀 Submitting OSU Benchmark Job to Flux (EKS)${NC}"
 echo ""
 echo "Benchmark: osu_${BENCHMARK}"
 echo "MPI Processes: ${NP}"
 echo "Cluster: ${CLUSTER}"
 echo ""
 
-# Determine MiniCluster name based on cluster
-if [ "$CLUSTER" == "local" ]; then
-  MINICLUSTER="sandia-study-cluster-local"
-else
-  MINICLUSTER="sandia-study-cluster"
-fi
+# EKS MiniCluster name
+MINICLUSTER="sandia-study-cluster"
 
 # Get the Flux broker pod (index 0)
 echo -e "${BLUE}Finding Flux broker pod...${NC}"
@@ -68,11 +69,7 @@ if [ -z "$POD_NAME" ]; then
   echo -e "${YELLOW}⚠ Flux MiniCluster not found or not ready${NC}"
   echo ""
   echo "Please deploy the Flux cluster first:"
-  if [ "$CLUSTER" == "local" ]; then
-    echo "  ./scripts/deploy-orbstack-flux.sh"
-  else
-    echo "  ./scripts/deploy-eks-flux.sh"
-  fi
+  echo "  ./eks/deploy.sh"
   exit 1
 fi
 
@@ -104,7 +101,7 @@ else
 fi
 
 echo ""
-# Determine benchmark directory (pt2pt vs collective)
+# Determine benchmark directory
 if [[ "$BENCHMARK" == "bw" || "$BENCHMARK" == "latency" || "$BENCHMARK" == "bibw" ]]; then
   BENCH_TYPE="pt2pt"
 else
@@ -114,19 +111,23 @@ fi
 echo -e "${BLUE}Submitting job to Flux...${NC}"
 
 # Submit the job via flux
-kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "
+JOB_ID=$(kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "
   export FLUX_URI=local:///mnt/flux/config/run/flux/local
   flux submit -n ${NP} sudo -u fluxuser /usr/bin/mpirun -np ${NP} /usr/local/libexec/osu-micro-benchmarks/mpi/${BENCH_TYPE}/osu_${BENCHMARK}
-"
+" | tr -d '\r')
 
 echo ""
-echo -e "${GREEN}✓ Job submitted!${NC}"
+echo -e "${GREEN}✓ Job submitted! ID: ${JOB_ID}${NC}"
 echo ""
-echo "To view job status:"
-echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux jobs\""
-echo ""
-echo "To view job output:"
-echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux job attach <JOBID>\""
-echo ""
-echo "To view all jobs:"
-echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux jobs -a\""
+
+if [ "$WAIT" == "true" ]; then
+  echo -e "${BLUE}Waiting for job completion and attaching output...${NC}"
+  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux job attach ${JOB_ID}"
+  echo ""
+else
+  echo -e "${YELLOW}Tip: Use ./eks/check-benchmark.sh to monitor status${NC}"
+  echo ""
+  echo "Manual commands:"
+  echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux jobs\""
+  echo "  kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c \"export FLUX_URI=local:///mnt/flux/config/run/flux/local; flux job attach ${JOB_ID}\""
+fi

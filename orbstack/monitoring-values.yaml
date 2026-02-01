@@ -356,7 +356,7 @@ grafana:
             timeInterval: 30s
         - name: Prometheus-Cloud
           type: prometheus
-          url: http://a4422c9b65a0143aeb73954efabec8c5-951b41d6eb081241.elb.us-west-2.amazonaws.com:9090
+          url: http://a2c632c9d6a864e7c8f9f6788b20a7c7-6edc3092f454edfe.elb.us-west-2.amazonaws.com:9090
           access: proxy
           isDefault: false
           jsonData:

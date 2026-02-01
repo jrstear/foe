@@ -1,0 +1,44 @@
+# Prometheus configuration for EKS (Remote Cluster)
+# We only need Prometheus Server here to scrape metrics and expose them to our local Grafana.
+
+# Disable components we don't need on the remote cluster
+grafana:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+# Configure Prometheus Server
+prometheus:
+  enabled: true
+  
+  service:
+    # Expose Prometheus via LoadBalancer so local Grafana can reach it
+    # Note: In production, use Ingress with auth or VPN/Peering
+    type: LoadBalancer
+    annotations:
+      # Use NLB for better performance/latency
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+
+  prometheusSpec:
+    # Reduce retention for remote/edge cluster
+    retention: 2d
+    
+    # Enable scraping of Flux pods
+    additionalScrapeConfigs:
+      - job_name: 'flux-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Only scrape pods with flux-related labels (sandia-study-cluster or flux-sample)
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            regex: (sandia-study-cluster|flux-sample).*
+            action: keep
+          # Add cluster label
+          - target_label: cluster
+            replacement: cloud
+          - target_label: location
+            replacement: eks
+          # Use port 9102 (Flux Prometheus exporter) if needed, or rely on discovered port
+          # Flux usually exposes metrics on a named port or we assume default
+

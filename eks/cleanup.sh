@@ -23,8 +23,11 @@ if [ "$CONFIRM" != "yes" ]; then
 fi
 
 echo ""
-echo "Step 1: Deleting MiniCluster..."
-kubectl delete -f k8s/flux-eks.yaml --ignore-not-found=true
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+
+echo -e "${BLUE}Step 1: Deleting Flux MiniCluster...${NC}"
+kubectl delete -f "$SCRIPT_DIR/flux.yaml" --ignore-not-found=true
 
 echo "Waiting for MiniCluster pods to terminate..."
 kubectl wait --for=delete pods -l app.kubernetes.io/name=sandia-study-cluster --timeout=120s 2>/dev/null || true
