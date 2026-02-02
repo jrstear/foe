@@ -129,13 +129,13 @@ grafana:
                       "uid": "Prometheus-Local"
                     },
                     "editorMode": "code",
-                    "expr": "flux_uptime",
-                    "legendFormat": "Local (OrbStack)",
+                    "expr": "count(up{job=\"flux-pods\"})",
+                    "legendFormat": "Local Nodes (OrbStack)",
                     "range": true,
                     "refId": "A"
                   }
                 ],
-                "title": "Local Cluster Uptime",
+                "title": "Local Nodes Up",
                 "type": "stat"
               },
               {
@@ -195,13 +195,13 @@ grafana:
                       "uid": "Prometheus-Cloud"
                     },
                     "editorMode": "code",
-                    "expr": "flux_uptime",
-                    "legendFormat": "Cloud (EKS)",
+                    "expr": "flux_nodes_up",
+                    "legendFormat": "Cloud Nodes (EKS)",
                     "range": true,
                     "refId": "A"
                   }
                 ],
-                "title": "Cloud Cluster Uptime",
+                "title": "Cloud Nodes Up",
                 "type": "stat"
               },
               {
@@ -235,8 +235,8 @@ grafana:
                       "uid": "Prometheus-Local"
                     },
                     "editorMode": "code",
-                    "expr": "flux_job_count",
-                    "legendFormat": "Local Jobs",
+                    "expr": "sum(flux_job_count) by (state)",
+                    "legendFormat": "Local Jobs ({{state}})",
                     "range": true,
                     "refId": "A"
                   }
@@ -275,8 +275,8 @@ grafana:
                       "uid": "Prometheus-Cloud"
                     },
                     "editorMode": "code",
-                    "expr": "flux_job_count",
-                    "legendFormat": "Cloud Jobs",
+                    "expr": "sum(flux_job_count) by (state)",
+                    "legendFormat": "Cloud Jobs ({{state}})",
                     "range": true,
                     "refId": "A"
                   }
@@ -301,7 +301,7 @@ grafana:
             "timezone": "",
             "title": "Hybrid Flux View",
             "uid": "flux-hybrid-overview",
-            "version": 1,
+            "version": 2,
             "weekStart": ""
           }
 

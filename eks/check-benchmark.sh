@@ -12,6 +12,16 @@ MINICLUSTER="sandia-study-cluster"
 # Use current context or optional override
 KUBECTL_ARGS=""
 
+# Auto-detect EKS context if current doesn't look like one
+CURRENT_CTX=$(kubectl config current-context)
+if [[ "$CURRENT_CTX" != *"arn:aws:eks"* ]]; then
+  EKS_CTX=$(kubectl config get-contexts -o name | grep "arn:aws:eks" | head -n 1)
+  if [ -n "$EKS_CTX" ]; then
+    echo -e "${YELLOW}Auto-selecting EKS context: $EKS_CTX${NC}"
+    KUBECTL_ARGS="--context $EKS_CTX"
+  fi
+fi
+
 echo -e "${BLUE}🔍 Checking Flux Benchmark Status (EKS)...${NC}"
 echo ""
 

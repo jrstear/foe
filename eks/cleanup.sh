@@ -41,7 +41,7 @@ kubectl wait --for=delete namespace operator-system --timeout=120s 2>/dev/null |
 
 echo ""
 echo "Step 3: Destroying Terraform infrastructure..."
-cd terraform/eks-flux
+cd "$SCRIPT_DIR/terraform"
 terraform destroy -auto-approve
 
 cd ..

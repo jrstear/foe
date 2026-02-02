@@ -39,6 +39,10 @@ prometheus:
             replacement: cloud
           - target_label: location
             replacement: eks
-          # Use port 9102 (Flux Prometheus exporter) if needed, or rely on discovered port
-          # Flux usually exposes metrics on a named port or we assume default
+          # Force port 8050 for Flux metrics (verified via /proc/net/tcp)
+          - source_labels: [__address__]
+            action: replace
+            regex: ([^:]+)(?::\d+)?
+            replacement: $1:8080
+            target_label: __address__
 

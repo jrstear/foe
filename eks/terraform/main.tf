@@ -48,6 +48,19 @@ module "eks" {
   # Enable public access for local kubectl
   cluster_endpoint_public_access = true
 
+  # EKS Addons (Core)
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+  }
+
   # Enable IRSA (IAM Roles for Service Accounts)
   enable_irsa = true
 
@@ -80,10 +93,64 @@ module "eks" {
     }
   }
 
+  # Allow inter-node communication for MPI (Flux)
+  # This opens all ports between nodes in the same security group
+  node_security_group_additional_rules = {
+    ingress_self_all = {
+      description = "Node to node all ports/protocols"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true
+    }
+  }
+
   # Cluster access entry for current user
   enable_cluster_creator_admin_permissions = true
 
   tags = {
     Name = var.cluster_name
   }
+}
+
+# IRSA Role for EFS CSI Driver (Manual definition to avoid module path issues)
+data "aws_iam_policy_document" "efs_csi_trust" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Federated"
+      identifiers = [module.eks.oidc_provider_arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(module.eks.oidc_provider_arn, "/^(.*provider/)/", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:efs-csi-controller-sa"]
+    }
+  }
+}
+
+resource "aws_iam_role" "efs_csi" {
+  name               = "${var.cluster_name}-efs-csi"
+  assume_role_policy = data.aws_iam_policy_document.efs_csi_trust.json
+}
+
+resource "aws_iam_role_policy_attachment" "efs_csi" {
+  role       = aws_iam_role.efs_csi.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
+}
+
+# EKS Addon: EFS CSI Driver
+resource "aws_eks_addon" "efs_csi" {
+  cluster_name             = module.eks.cluster_name
+  addon_name               = "aws-efs-csi-driver"
+  service_account_role_arn = aws_iam_role.efs_csi.arn
+  
+  depends_on = [
+    module.eks.eks_managed_node_groups,
+    aws_iam_role_policy_attachment.efs_csi
+  ]
 }

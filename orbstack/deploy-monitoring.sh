@@ -26,7 +26,7 @@ echo ""
 echo -e "${BLUE}Step 3: Installing kube-prometheus-stack...${NC}"
 helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
     --namespace monitoring --create-namespace \
-    -f k8s/monitoring-values-local.yaml \
+    -f orbstack/monitoring-values.yaml \
     --wait --timeout 10m
 
 # Wait for Prometheus to be ready

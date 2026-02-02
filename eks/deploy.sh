@@ -22,7 +22,7 @@ echo -e "${BLUE}Step 1: Checking prerequisites...${NC}"
 
 echo ""
 echo -e "${BLUE}Step 2: Deploying Terraform infrastructure...${NC}"
-cd "$REPO_ROOT/terraform/eks-flux"
+cd "$SCRIPT_DIR/terraform"
 
 # Initialize Terraform
 if [ ! -d ".terraform" ]; then

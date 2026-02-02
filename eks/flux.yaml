@@ -17,17 +17,10 @@ spec:
   containers:
     - image: ghcr.io/flux-framework/flux-restful-api:latest
       workingDir: /home/flux
-      
-      # Keep broker running - attempt manual job submission
-      command: |
-        echo "Flux broker starting..."
-        echo "Cluster ready with 2 nodes"
-        # Keep container alive
-        tail -f /dev/null
-      
-  # Interactive mode - allows exec into pods
-  interactive: true
-  
-  # Logging for debugging
+      # Mount EFS for persistent storage (benchmarks, results)
+      volumes:
+        data:
+          path: /data
+          claimName: flux-pvc  # Logging for debugging
   flux:
     logLevel: 7

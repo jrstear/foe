@@ -85,9 +85,10 @@ echo ""
 
 # Install OSU benchmarks if not already present
 echo -e "${BLUE}Checking for OSU benchmarks...${NC}"
-HAS_OSU=$(kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "ls /usr/local/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_bw 2>/dev/null" || echo "")
-
-if [ -z "$HAS_OSU" ]; then
+# Check if OSU benchmarks are installed (using exit code logic to avoid noise)
+if kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "ls /usr/local/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_bw >/dev/null 2>&1"; then
+  echo -e "${GREEN}✓ OSU benchmarks already installed${NC}"
+else
   echo -e "${YELLOW}Installing OSU Micro-Benchmarks...${NC}"
   kubectl $KUBECTL_ARGS exec ${POD_NAME} -- bash -c "
     apt-get update -qq && \
@@ -103,8 +104,6 @@ if [ -z "$HAS_OSU" ]; then
     rm -rf osu-micro-benchmarks-7.4*
   "
   echo -e "${GREEN}✓ OSU benchmarks installed${NC}"
-else
-  echo -e "${GREEN}✓ OSU benchmarks already installed${NC}"
 fi
 
 echo ""

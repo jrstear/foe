@@ -8,9 +8,21 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Ensure we are on an EKS context or warn
+# Auto-detect EKS context if not explicitly likely correct
 CURRENT_CTX=$(kubectl config current-context)
-echo -e "Current Context: ${YELLOW}${CURRENT_CTX}${NC}"
+if [[ "$CURRENT_CTX" != *"arn:aws:eks"* ]]; then
+  echo -e "${YELLOW}Current context '$CURRENT_CTX' does not look like an EKS cluster.${NC}"
+  # Try to find an EKS context
+  EKS_CTX=$(kubectl config get-contexts -o name | grep "arn:aws:eks" | head -n 1)
+  if [ -n "$EKS_CTX" ]; then
+    echo -e "${GREEN}Switching to detected EKS context: $EKS_CTX${NC}"
+    kubectl config use-context "$EKS_CTX"
+  else
+    echo -e "${YELLOW}Warning: Proceeding with '$CURRENT_CTX'. If this fails, set usage context manually.${NC}"
+  fi
+fi
+
+echo -e "Using Context: ${GREEN}$(kubectl config current-context)${NC}"
 echo ""
 
 echo -e "${BLUE}1. Cluster nodes:${NC}"
