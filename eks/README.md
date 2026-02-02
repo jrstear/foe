@@ -33,8 +33,18 @@ This scenario deploys a persistent Flux "MiniCluster" on an Amazon EKS cluster.
 *   Submits an OSU Bandwidth test.
 *   Use `--wait` to see results immediately, or use `check-benchmark.sh` later.
 
-### 4. Cleanup
+### 4. Metrics & Monitoring
+To enable Prometheus metrics for the cluster:
+```bash
+# 1. Deploy Prometheus stack
+./eks/deploy-monitoring.sh
+
+# 2. Start Flux Metrics Exporter (Required after every Flux deployment)
+./eks/start-api.sh
+```
+
+### 5. Cleanup
 ```bash
 ./eks/cleanup.sh
 ```
-*   **Note:** This only removes the Flux workload. To tear down EKS infrastructure, go to `terraform/eks-flux` and run `terraform destroy`.
+*   **Note:** `cleanup.sh` removes both Flux workloads AND destroys the EKS infrastructure via Terraform.
