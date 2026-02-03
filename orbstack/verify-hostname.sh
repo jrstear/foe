@@ -24,15 +24,21 @@ kubectl get pods -l job-name=sandia-study-cluster-local
 echo ""
 
 echo -e "${BLUE}4. Getting lead broker pod...${NC}"
-POD_NAME=$(kubectl get pods -l job-name=sandia-study-cluster-local,job-index=0 -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+# First try to find a running pod with job-index=0
+POD_NAME=$(kubectl get pods -l job-name=sandia-study-cluster-local,job-index=0 --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
 
 if [ -z "$POD_NAME" ]; then
-    echo "Trying alternative label selector (flux-sample)..."
-    POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=flux-sample -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+    echo "No running pod with job-index=0, trying any running pod from sandia-study-cluster-local..."
+    POD_NAME=$(kubectl get pods -l job-name=sandia-study-cluster-local --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
 fi
 
 if [ -z "$POD_NAME" ]; then
-    echo "Error: No MiniCluster pods found"
+    echo "Trying alternative label selector (flux-sample)..."
+    POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=flux-sample --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+fi
+
+if [ -z "$POD_NAME" ]; then
+    echo "Error: No running MiniCluster pods found"
     exit 1
 fi
 
